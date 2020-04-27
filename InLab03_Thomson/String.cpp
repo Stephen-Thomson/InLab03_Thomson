@@ -3,6 +3,8 @@
 #include <iostream>
 using std::cout;
 using std::endl;
+#include <new>
+using std::bad_alloc;
 #include "String.h"
 
 
@@ -16,7 +18,7 @@ using std::endl;
 *	Creates default String;
 *
 ********************************************************************************************************************/
-String::String()
+String::String() : m_string(nullptr), m_length(0)
 {
 
 
@@ -33,9 +35,12 @@ String::String()
 *	Creates single character String.
 *
 ********************************************************************************************************************/
-String::String(char ch)
+String::String(char ch) : m_string(nullptr)
 {
-
+	m_string = new char[2];
+	m_string[0] = ch;
+	m_string[1] = '\0';
+	m_length = 1;
 
 }
 
@@ -50,9 +55,22 @@ String::String(char ch)
 *	Creates String with argument.
 *
 ********************************************************************************************************************/
-String::String(const char* String)
+String::String(const char* String) : m_string(nullptr)
 {
+	if (String != nullptr)
+	{
+		try
+		{
+			m_string = new char[strlen(String) + 1];
+			strcpy_s(m_string, strlen(String)+1, String);
+			m_length = strlen(m_string);
+		}
+		catch (bad_alloc Exception)
+		{
+			throw;
+		}
 
+	}
 
 }
 
@@ -67,9 +85,21 @@ String::String(const char* String)
 *	Creates a copy of the String.
 *
 ********************************************************************************************************************/
-String::String(const String& copy)
+String::String(const String& copy) : m_string(nullptr)
 {
-
+	if (copy.m_string != nullptr)
+	{
+		try
+		{
+			m_string = new char[strlen(copy.m_string) + 1];
+			strcpy_s(m_string, strlen(copy.m_string) + 1, copy.m_string);
+			m_length = strlen(m_string);
+		}
+		catch (bad_alloc Exception)
+		{
+			throw;
+		}
+	}
 
 }
 
@@ -86,7 +116,9 @@ String::String(const String& copy)
 ********************************************************************************************************************/
 String::String(String&& copy)
 {
-
+	m_string = copy.m_string;
+	m_length = copy.m_length;
+	copy.m_string = nullptr;
 
 }
 
@@ -103,7 +135,8 @@ String::String(String&& copy)
 ********************************************************************************************************************/
 String::~String()
 {
-
+	delete[] m_string;
+	
 
 }
 
@@ -120,7 +153,28 @@ String::~String()
 ********************************************************************************************************************/
 String& String::operator=(const String& rhs)
 {
-	
+	if (this != &rhs)
+	{
+		delete[] m_string;
+		if (rhs.m_string != nullptr)
+		{
+			try
+			{
+				m_string = new char[strlen(rhs.m_string) + 1];
+				strcpy_s(m_string, strlen(rhs.m_string) + 1, rhs.m_string);
+				m_length = strlen(m_string);
+			}
+			catch (bad_alloc Exception)
+			{
+				throw;
+			}
+		}
+		else
+		{
+			m_string = nullptr;
+		}
+	}
+	return *this;
 
 }
 
@@ -137,8 +191,19 @@ String& String::operator=(const String& rhs)
 ********************************************************************************************************************/
 String& String::operator=(String&& rhs)
 {
-	
-
+	if (this != &rhs)
+	{
+		delete[] m_string;
+		m_string = rhs.m_string;
+		m_length = rhs.m_length;
+		rhs.m_string = nullptr;
+	}
+	else
+	{
+		m_string = nullptr;
+		m_length = 0;
+	}
+	return *this;
 }
 
 
@@ -154,7 +219,7 @@ String& String::operator=(String&& rhs)
 ********************************************************************************************************************/
 bool String::operator==(const String& Object) const
 {
-
+	return strcmp(m_string, Object.m_string) == 0 ? true : false;
 
 }
 
@@ -171,7 +236,7 @@ bool String::operator==(const String& Object) const
 ********************************************************************************************************************/
 bool String::operator==(const char* String) const
 {
-	
+	return strcmp(m_string, String) == 0 ? true : false;
 
 }
 
@@ -188,7 +253,7 @@ bool String::operator==(const char* String) const
 ********************************************************************************************************************/
 bool String::operator!=(const char* String) const
 {
-	
+	return strcmp(m_string, String) != 0 ? true : false;
 
 }
 
@@ -205,7 +270,7 @@ bool String::operator!=(const char* String) const
 ********************************************************************************************************************/
 bool String::operator!=(const String& Object) const
 {
-	
+	return strcmp(m_string, Object.m_string) != 0 ? true : false;
 
 }
 
@@ -222,7 +287,7 @@ bool String::operator!=(const String& Object) const
 ********************************************************************************************************************/
 bool String::operator<(const char* String) const
 {
-	
+	return strcmp(m_string, String) < 0 ? true : false;
 
 }
 
@@ -239,7 +304,7 @@ bool String::operator<(const char* String) const
 ********************************************************************************************************************/
 bool String::operator<(const String& Object) const
 {
-	
+	return strcmp(m_string, Object.m_string) < 0 ? true : false;
 
 }
 
@@ -256,7 +321,7 @@ bool String::operator<(const String& Object) const
 ********************************************************************************************************************/
 bool String::operator<=(const char* String) const
 {
-	
+	return strcmp(m_string, String) <= 0 ? true : false;
 
 }
 
@@ -273,7 +338,7 @@ bool String::operator<=(const char* String) const
 ********************************************************************************************************************/
 bool String::operator<=(const String& Object) const
 {
-	
+	return strcmp(m_string, Object.m_string) <= 0 ? true : false;
 
 }
 
@@ -290,7 +355,7 @@ bool String::operator<=(const String& Object) const
 ********************************************************************************************************************/
 bool String::operator>(const char* String) const
 {
-	
+	return strcmp(m_string, String) > 0 ? true : false;
 
 }
 
@@ -307,7 +372,7 @@ bool String::operator>(const char* String) const
 ********************************************************************************************************************/
 bool String::operator>(const String& Object) const
 {
-	
+	return strcmp(m_string, Object.m_string) > 0 ? true : false;
 
 }
 
@@ -324,7 +389,7 @@ bool String::operator>(const String& Object) const
 ********************************************************************************************************************/
 bool String::operator>=(const String& Object) const
 {
-	
+	return strcmp(m_string, Object.m_string) >= 0 ? true : false;
 
 }
 
@@ -341,7 +406,7 @@ bool String::operator>=(const String& Object) const
 ********************************************************************************************************************/
 bool String::operator>=(const char* String) const
 {
-	
+	return strcmp(m_string, String) >= 0 ? true : false;
 
 }
 
@@ -358,8 +423,23 @@ bool String::operator>=(const char* String) const
 ********************************************************************************************************************/
 String String::operator+(const String& rhs)
 {
-	
-
+	String Temp;
+	int x = strlen(m_string);
+	int y = strlen(rhs.m_string);
+	try
+	{
+		Temp.m_string = new char[x + y + 1];
+		strcpy_s(Temp.m_string, strlen(m_string) + 1, m_string);
+		strcat(Temp.m_string, rhs.m_string);
+		delete[] m_string;
+		m_string = Temp.m_string;
+		m_length = strlen(m_string);
+		Temp.m_string = nullptr;
+	}
+	catch (bad_alloc Exemption)
+	{
+		throw;
+	}
 }
 
 
@@ -375,7 +455,23 @@ String String::operator+(const String& rhs)
 ********************************************************************************************************************/
 String String::operator+=(const String& rhs)
 {
-	
+	String Temp;
+	int x = strlen(m_string);
+	int y = strlen(rhs.m_string);
+	try
+	{
+		Temp.m_string = new char[x + y + 1];
+		strcpy_s(Temp.m_string, strlen(m_string) + 1, m_string);
+		strcat(Temp.m_string, rhs.m_string);
+		delete[] m_string;
+		m_string = Temp.m_string;
+		m_length = strlen(m_string);
+		Temp.m_string = nullptr;
+	}
+	catch (bad_alloc Exemption)
+	{
+		throw;
+	}
 
 }
 
@@ -392,7 +488,7 @@ String String::operator+=(const String& rhs)
 ********************************************************************************************************************/
 String& String::operator++()
 {
-	
+	strupr(m_string);
 
 }
 
@@ -409,7 +505,9 @@ String& String::operator++()
 ********************************************************************************************************************/
 String& String::operator++(int)
 {
-	
+	String Temp(*this);
+	++(*this);
+	return Temp;
 
 }
 
@@ -426,7 +524,8 @@ String& String::operator++(int)
 ********************************************************************************************************************/
 String& String::operator--()
 {
-	
+	strlwr(m_string);
+	return *this;
 
 }
 
@@ -443,7 +542,9 @@ String& String::operator--()
 ********************************************************************************************************************/
 String& String::operator--(int)
 {
-	
+	String Temp(*this);
+	--(*this);
+	return Temp;
 
 }
 
@@ -460,8 +561,17 @@ String& String::operator--(int)
 ********************************************************************************************************************/
 char String::operator[](int i)
 {
-	
-
+	char x;
+	try
+	{
+		x = m_string[i];
+	}
+	catch (bad_alloc Exemption)
+	{
+		cout << "That element is not in the string: " << Exemption.what() << "\n" << endl;
+		throw;
+	}
+	return x;
 }
 
 
@@ -477,7 +587,7 @@ char String::operator[](int i)
 ********************************************************************************************************************/
 String::operator char* () const
 {
-
+	return m_string;
 
 }
 
@@ -494,7 +604,7 @@ String::operator char* () const
 ********************************************************************************************************************/
 int String::GetLength()
 {
-	
+	return m_length;
 
 }
 
@@ -511,7 +621,7 @@ int String::GetLength()
 ********************************************************************************************************************/
 const char* String::GetString() const
 {
-	
+	return m_string;
 
 }
 
@@ -528,7 +638,9 @@ const char* String::GetString() const
 ********************************************************************************************************************/
 ostream& operator<<(ostream& out, const String& rhs)
 {
-	
+	out << rhs.m_string << rhs.m_length;
+	return out;
+
 
 }
 
@@ -543,8 +655,11 @@ ostream& operator<<(ostream& out, const String& rhs)
 *	String to In Stream.
 *
 ********************************************************************************************************************/
-istream& operator>>(istream& in, const String& rhs)
+istream& operator>>(istream& in, String& rhs)
 {
-	
+	char* Temp;
+	Temp = new char[strlen(rhs.m_string) + 1];
+	in.getline(Temp, strlen(rhs.m_string) + 1);
+	rhs = String(Temp);
 
 }

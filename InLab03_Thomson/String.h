@@ -3,7 +3,7 @@
 *
 * Class: String
 *
-* Purpose: Assigns a string and allows manipulation of the string.
+* Purpose: Creates and allows manipulation of a String. Throws bad_alloc for errors.
 *
 * Manager Functions:
 *	Default Constructor
@@ -41,18 +41,16 @@ class String
 		String& operator=(String&& rhs);
 		bool operator ==(const String& Object) const;
 		bool operator ==(const char * String) const;
-		bool operator !=(const char* String) const;
 		bool operator !=(const String& Object) const;
-		bool operator <(const char* String) const;
+		bool operator !=(const char* String) const;
 		bool operator <(const String& Object) const;
-		bool operator <=(const char* String) const;
+		bool operator <(const char* String) const;
 		bool operator <=(const String& Object) const;
-		bool operator >(const char* String) const;
+		bool operator <=(const char* String) const;
 		bool operator >(const String& Object) const;
+		bool operator >(const char* String) const;
 		bool operator >=(const String& Object) const;
 		bool operator >=(const char* String) const;
-		friend ostream& operator << (ostream& out, const String& rhs);
-		friend istream& operator >> (istream& in, const String& rhs);
 		String operator +(const String& rhs);
 		String operator +=(const String& rhs);
 		String& operator ++();
@@ -63,6 +61,8 @@ class String
 		operator char* () const;
 		int GetLength();
 		const char * GetString() const;
+		friend ostream& operator << (ostream& out, const String& rhs);
+		friend istream& operator >> (istream& in, String& rhs);
 
 	private:
 		char * m_string;
