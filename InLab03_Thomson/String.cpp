@@ -568,7 +568,7 @@ char String::operator[](int i)
 	}
 	catch (bad_alloc Exemption)
 	{
-		cout << "That element is not in the string: " << Exemption.what() << "\n" << endl;
+		cout << "That element is not in the string: " << "\n" << endl;
 		throw;
 	}
 	return x;
