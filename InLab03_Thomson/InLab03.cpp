@@ -22,15 +22,17 @@ using std::cout;
 using std::endl;
 #include <new>
 using std::bad_alloc;
+using std::set_new_handler;
 #include "String.h"
 #include <crtdbg.h>
 
-
+void MyHandler();
 
 int main()
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
+	set_new_handler(MyHandler);
 	
 	String string1("Hello Cruel World");
 	String string2("Goodnight Earth");
@@ -94,9 +96,16 @@ int main()
 	}
 	cout << endl;
 
-	cout << "Add string3 to string1: " << endl;
-	string1 += string3;
-	cout << string1 << "\n" << endl;
+	try
+	{
+		cout << "Add string3 to string1: " << endl;
+		string1 += string3;
+		cout << string1 << "\n" << endl;
+	}
+	catch (bad_alloc Exception)
+	{
+		cout << "Exception Thrown" << endl;
+	}
 
 	cout << "Decrement string2: " << endl;
 	--string2;
@@ -111,9 +120,12 @@ int main()
 		cout << string1[7] << endl;
 		cout << string1[100] << "\n" << endl;
 	}
-	catch (bad_alloc Exception)
+	catch (int Exception)
 	{
-		cout << "Error: Out of Bounds" << endl;
+		if (Exception == -1)
+		{
+			cout << "Error: Out of Bounds" << endl;
+		}
 	}
 
 	cout << "The length of the strings 1 - 4: " << endl;
@@ -123,4 +135,12 @@ int main()
 	cout << string4.GetLength() << endl;
 
 
+}
+
+
+
+void MyHandler()
+{
+	cout << "MyHandler called." << endl;
+	throw (bad_alloc());
 }

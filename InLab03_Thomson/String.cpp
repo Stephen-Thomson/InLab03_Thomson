@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <cstring>
 #include <cctype>
 #include <iostream>
@@ -55,20 +56,20 @@ String::String(char ch) : m_string(nullptr)
 *	Creates String with argument.
 *
 ********************************************************************************************************************/
-String::String(const char* String) : m_string(nullptr)
+String::String(const char* String) : m_string(nullptr), m_length(0)
 {
 	if (String != nullptr)
 	{
 		try
 		{
 			m_string = new char[strlen(String) + 1];
-			strcpy_s(m_string, strlen(String)+1, String);
-			m_length = strlen(m_string);
 		}
 		catch (bad_alloc Exception)
 		{
 			throw;
 		}
+		strcpy_s(m_string, strlen(String) + 1, String);
+		m_length = strlen(m_string);
 
 	}
 
@@ -85,20 +86,21 @@ String::String(const char* String) : m_string(nullptr)
 *	Creates a copy of the String.
 *
 ********************************************************************************************************************/
-String::String(const String& copy) : m_string(nullptr)
+String::String(const String& copy) : m_string(nullptr), m_length(0)
 {
 	if (copy.m_string != nullptr)
 	{
 		try
 		{
 			m_string = new char[strlen(copy.m_string) + 1];
-			strcpy_s(m_string, strlen(copy.m_string) + 1, copy.m_string);
-			m_length = strlen(m_string);
 		}
 		catch (bad_alloc Exception)
 		{
 			throw;
 		}
+		strcpy_s(m_string, strlen(copy.m_string) + 1, copy.m_string);
+		m_length = strlen(m_string);
+
 	}
 
 }
@@ -135,8 +137,15 @@ String::String(String&& copy)
 ********************************************************************************************************************/
 String::~String()
 {
-	delete[] m_string;
-	
+	try
+	{
+		delete[] m_string;
+	}
+	catch (bad_alloc Exception)
+	{
+		cout << "Delete problem still working on.\n" << endl;
+		throw;
+	}
 
 }
 
@@ -461,18 +470,15 @@ String String::operator+=(const String& rhs)
 	try
 	{
 		Temp.m_string = new char[x + y + 1];
-		strcpy_s(Temp.m_string, strlen(m_string) + 1, m_string);
-		strcat(Temp.m_string, rhs.m_string);
-		delete[] m_string;
-		m_string = Temp.m_string;
-		m_length = strlen(m_string);
-		Temp.m_string = nullptr;
 	}
 	catch (bad_alloc Exemption)
 	{
 		throw;
 	}
-
+	strcpy_s(Temp.m_string, strlen(m_string) + 1, m_string);
+	strcat(Temp.m_string, rhs.m_string);
+	*this = Temp;
+	return Temp;
 }
 
 
@@ -488,7 +494,8 @@ String String::operator+=(const String& rhs)
 ********************************************************************************************************************/
 String& String::operator++()
 {
-	strupr(m_string);
+	_strupr(m_string);
+	return *this;
 
 }
 
@@ -524,7 +531,7 @@ String& String::operator++(int)
 ********************************************************************************************************************/
 String& String::operator--()
 {
-	strlwr(m_string);
+	_strlwr(m_string);
 	return *this;
 
 }
@@ -561,16 +568,14 @@ String& String::operator--(int)
 ********************************************************************************************************************/
 char String::operator[](int i)
 {
+	int Expt = -1;
 	char x;
-	try
+	if (i > m_length)
 	{
-		x = m_string[i];
+		throw Expt;
 	}
-	catch (bad_alloc Exemption)
-	{
-		cout << "That element is not in the string: " << "\n" << endl;
-		throw;
-	}
+	x = m_string[i];
+	
 	return x;
 }
 
@@ -638,7 +643,7 @@ const char* String::GetString() const
 ********************************************************************************************************************/
 ostream& operator<<(ostream& out, const String& rhs)
 {
-	out << rhs.m_string << rhs.m_length;
+	out << rhs.m_string << "  " << rhs.m_length;
 	return out;
 
 
@@ -659,7 +664,8 @@ istream& operator>>(istream& in, String& rhs)
 {
 	char* Temp;
 	Temp = new char[strlen(rhs.m_string) + 1];
-	in.getline(Temp, strlen(rhs.m_string) + 1);
+	in.getline(Temp, strlen(rhs.m_string));
 	rhs = String(Temp);
+	return in;
 
 }
